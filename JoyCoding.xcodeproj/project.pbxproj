@@ -8,7 +8,18 @@
 
 /* Begin PBXFileReference section */
 		9E224DDF301DC69300C14C7B /* JoyCoding.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoyCoding.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E224DF0301DC70000C14C7B /* JoyCodingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoyCodingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXContainerItemProxy section */
+		9E224DF9301DC70000C14C7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9E224DD7301DC69300C14C7B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9E224DDE301DC69300C14C7B;
+			remoteInfo = JoyCoding;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9E224DE1301DC69300C14C7B /* JoyCoding */ = {
@@ -16,10 +27,22 @@
 			path = JoyCoding;
 			sourceTree = "<group>";
 		};
+		9E224DF1301DC70000C14C7B /* JoyCodingTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = JoyCodingTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		9E224DDC301DC69300C14C7B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E224DF2301DC70000C14C7B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				9E224DE1301DC69300C14C7B /* JoyCoding */,
+				9E224DF1301DC70000C14C7B /* JoyCodingTests */,
 				9E224DE0301DC69300C14C7B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				9E224DDF301DC69300C14C7B /* JoyCoding.app */,
+				9E224DF0301DC70000C14C7B /* JoyCodingTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,6 +95,29 @@
 			productReference = 9E224DDF301DC69300C14C7B /* JoyCoding.app */;
 			productType = "com.apple.product-type.application";
 		};
+		9E224DF5301DC70000C14C7B /* JoyCodingTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9E224DF6301DC70000C14C7B /* Build configuration list for PBXNativeTarget "JoyCodingTests" */;
+			buildPhases = (
+				9E224DF3301DC70000C14C7B /* Sources */,
+				9E224DF2301DC70000C14C7B /* Frameworks */,
+				9E224DF4301DC70000C14C7B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9E224DFA301DC70000C14C7B /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				9E224DF1301DC70000C14C7B /* JoyCodingTests */,
+			);
+			name = JoyCodingTests;
+			packageProductDependencies = (
+			);
+			productName = JoyCodingTests;
+			productReference = 9E224DF0301DC70000C14C7B /* JoyCodingTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -82,6 +130,10 @@
 				TargetAttributes = {
 					9E224DDE301DC69300C14C7B = {
 						CreatedOnToolsVersion = 26.6;
+					};
+					9E224DF5301DC70000C14C7B = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 9E224DDE301DC69300C14C7B;
 					};
 				};
 			};
@@ -100,12 +152,20 @@
 			projectRoot = "";
 			targets = (
 				9E224DDE301DC69300C14C7B /* JoyCoding */,
+				9E224DF5301DC70000C14C7B /* JoyCodingTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		9E224DDD301DC69300C14C7B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E224DF4301DC70000C14C7B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +182,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9E224DF3301DC70000C14C7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9E224DFA301DC70000C14C7B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9E224DDE301DC69300C14C7B /* JoyCoding */;
+			targetProxy = 9E224DF9301DC70000C14C7B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9E224DE8301DC69400C14C7B /* Debug */ = {
@@ -254,7 +329,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5Q85C9M9LA;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -286,7 +361,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 5Q85C9M9LA;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -309,6 +384,38 @@
 			};
 			name = Release;
 		};
+		9E224DF7301DC70000C14C7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5Q85C9M9LA;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shifenniu.JoyCodingTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JoyCoding.app/Contents/MacOS/JoyCoding";
+			};
+			name = Debug;
+		};
+		9E224DF8301DC70000C14C7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 5Q85C9M9LA;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.5;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shifenniu.JoyCodingTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JoyCoding.app/Contents/MacOS/JoyCoding";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -326,6 +433,15 @@
 			buildConfigurations = (
 				9E224DEB301DC69400C14C7B /* Debug */,
 				9E224DEC301DC69400C14C7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9E224DF6301DC70000C14C7B /* Build configuration list for PBXNativeTarget "JoyCodingTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E224DF7301DC70000C14C7B /* Debug */,
+				9E224DF8301DC70000C14C7B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
