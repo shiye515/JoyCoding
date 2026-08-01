@@ -6,10 +6,11 @@ struct ContentView: View {
     @EnvironmentObject private var permissionsManager: PermissionsManager
 
     var body: some View {
-        VStack(spacing: 0) {
-            deviceSection
-            Divider()
-            buttonSection
+        NavigationSplitView {
+            sidebar
+                .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 380)
+        } detail: {
+            mappingDetail
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .sheet(isPresented: $appState.isPermissionsPresented) {
@@ -22,179 +23,173 @@ struct ContentView: View {
         }
     }
 
-    private var deviceSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label("已连接的设备", systemImage: "gamecontroller")
-                    .font(.headline)
-                Spacer()
-                Text("\(controllerService.state.devices.count) 台")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            if controllerService.state.devices.isEmpty {
-                HStack(spacing: 12) {
-                    Image(systemName: "cable.connector.slash")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("还没有连接游戏手柄")
-                            .font(.subheadline.weight(.medium))
-                        Text("请通过 USB 或蓝牙连接手柄，设备会自动出现在这里。")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .frame(maxWidth: .infinity, minHeight: 76, alignment: .leading)
-                .padding(.horizontal, 4)
-            } else {
-                ScrollView(.horizontal) {
-                    HStack(spacing: 12) {
-                        ForEach(controllerService.state.devices) { device in
-                            DeviceCard(
-                                device: device,
-                                isSelected: device.id == controllerService.state.selectedDeviceID
-                            ) {
-                                controllerService.selectDevice(device.id)
-                            }
-                        }
-                    }
-                    .padding(.vertical, 2)
-                }
-                .scrollIndicators(.hidden)
-            }
-        }
-        .padding(20)
-        .frame(minHeight: 142, alignment: .top)
-    }
-
     @ViewBuilder
-    private var buttonSection: some View {
-        if let device = controllerService.state.selectedDevice {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("按键")
-                            .font(.title3.weight(.semibold))
-                        Text(device.name)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Label("按下手柄按键进行测试", systemImage: "sparkles")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                if device.buttons.isEmpty {
-                    ContentUnavailableView(
-                        "未发现可识别按键",
-                        systemImage: "questionmark.square.dashed",
-                        description: Text("该设备没有通过 GameController 提供标准按钮。")
-                    )
-                } else {
-                    ScrollView {
-                        LazyVGrid(
-                            columns: [GridItem(.adaptive(minimum: 150), spacing: 12)],
-                            spacing: 12
-                        ) {
-                            ForEach(device.buttons.sorted()) { button in
-                                ButtonStateCard(
-                                    button: button,
-                                    isPressed: controllerService.state.isPressed(
-                                        button.id,
-                                        on: device.id
-                                    )
-                                )
-                            }
-                        }
-                        .padding(.vertical, 2)
-                    }
-                }
-            }
-            .padding(20)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        } else {
+    private var sidebar: some View {
+        if controllerService.state.devices.isEmpty {
             ContentUnavailableView(
                 "等待连接手柄",
                 systemImage: "gamecontroller",
-                description: Text("连接后，可在这里实时查看每个按键的状态。")
+                description: Text("请通过 USB 或蓝牙连接手柄。")
             )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+        } else {
+            VStack(spacing: 0) {
+                devicePicker
+                Divider()
+                buttonList
+            }
+            .navigationTitle("设备与按键")
         }
     }
-}
 
-private struct DeviceCard: View {
-    let device: ControllerDevice
-    let isSelected: Bool
-    let action: () -> Void
+    private var devicePicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("当前设备")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
 
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: "gamecontroller.fill")
-                    .font(.title2)
-                    .foregroundStyle(isSelected ? Color.white : Color.accentColor)
-                VStack(alignment: .leading, spacing: 2) {
+            Picker("当前设备", selection: selectedDeviceBinding) {
+                ForEach(controllerService.state.devices) { device in
                     Text(device.name)
-                        .font(.subheadline.weight(.semibold))
-                        .lineLimit(1)
-                    Text(device.category)
-                        .font(.caption)
-                        .foregroundStyle(isSelected ? Color.white.opacity(0.8) : Color.secondary)
-                        .lineLimit(1)
-                }
-                Spacer(minLength: 6)
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.white)
+                        .tag(Optional(device.id))
                 }
             }
-            .frame(width: 210, alignment: .leading)
-            .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(isSelected ? Color.accentColor : Color(nsColor: .controlBackgroundColor))
-            )
-            .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(isSelected ? Color.clear : Color.secondary.opacity(0.2))
-            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(device.name)\(isSelected ? "，已选择" : "")")
+        .padding(16)
+    }
+
+    @ViewBuilder
+    private var buttonList: some View {
+        if let device = controllerService.state.selectedDevice {
+            if device.buttons.isEmpty {
+                ContentUnavailableView(
+                    "未发现可识别按键",
+                    systemImage: "questionmark.square.dashed",
+                    description: Text("该设备没有通过 GameController 提供标准按钮。")
+                )
+                .padding()
+            } else {
+                List(selection: selectedButtonBinding) {
+                    Section("按键") {
+                        ForEach(device.buttons.sorted()) { button in
+                            ButtonListRow(
+                                button: button,
+                                isPressed: controllerService.state.isPressed(
+                                    button.id,
+                                    on: device.id
+                                )
+                            )
+                            .tag(Optional(button.id))
+                        }
+                    }
+                }
+                .listStyle(.sidebar)
+            }
+        } else {
+            ContentUnavailableView(
+                "选择一个设备",
+                systemImage: "gamecontroller",
+                description: Text("连接或选择手柄后将在这里显示按键。")
+            )
+            .padding()
+        }
+    }
+
+    @ViewBuilder
+    private var mappingDetail: some View {
+        if let button = controllerService.state.selectedButton,
+           let device = controllerService.state.selectedDevice {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("按键映射")
+                            .font(.title2.weight(.bold))
+                        Text(device.name)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    GroupBox("当前按键") {
+                        HStack(spacing: 12) {
+                            Image(systemName: controllerService.state.isPressed(button.id, on: device.id) ? "circle.inset.filled" : "circle")
+                                .font(.title2)
+                                .foregroundStyle(controllerService.state.isPressed(button.id, on: device.id) ? Color.accentColor : Color.secondary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(button.name)
+                                    .font(.title3.weight(.semibold))
+                                Text(controllerService.state.isPressed(button.id, on: device.id) ? "正在按下" : "当前松开")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.vertical, 4)
+                    }
+
+                    GroupBox("键盘映射") {
+                        LabeledContent("映射到") {
+                            Text(button.name)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                    }
+
+                    Text("这是映射设置的界面占位。后续版本会在这里选择键盘按键；当前不会保存配置或发送键盘事件。")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(28)
+                .frame(maxWidth: 640, alignment: .leading)
+            }
+        } else {
+            ContentUnavailableView(
+                "选择一个按键",
+                systemImage: "keyboard",
+                description: Text("从左侧按键列表选择后，可在这里查看映射设置。")
+            )
+        }
+    }
+
+    private var selectedDeviceBinding: Binding<ControllerDevice.ID?> {
+        Binding(
+            get: { controllerService.state.selectedDeviceID },
+            set: { id in
+                if let id {
+                    controllerService.selectDevice(id)
+                }
+            }
+        )
+    }
+
+    private var selectedButtonBinding: Binding<ControllerButton.ID?> {
+        Binding(
+            get: { controllerService.state.selectedButtonID },
+            set: { id in
+                if let id {
+                    controllerService.selectButton(id)
+                }
+            }
+        )
     }
 }
 
-private struct ButtonStateCard: View {
+private struct ButtonListRow: View {
     let button: ControllerButton
     let isPressed: Bool
 
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: isPressed ? "circle.inset.filled" : "circle")
-                .font(.title3)
+                .foregroundStyle(isPressed ? Color.accentColor : Color.secondary)
+                .animation(.easeOut(duration: 0.08), value: isPressed)
             Text(button.name)
-                .font(.body.weight(isPressed ? .semibold : .regular))
             Spacer()
             Text(isPressed ? "按下" : "松开")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(isPressed ? Color.white.opacity(0.9) : Color.secondary)
+                .font(.caption.weight(isPressed ? .semibold : .regular))
+                .foregroundStyle(isPressed ? Color.accentColor : Color.secondary)
         }
-        .foregroundStyle(isPressed ? Color.white : Color.primary)
-        .padding(.horizontal, 14)
-        .frame(minHeight: 52)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isPressed ? Color.accentColor : Color(nsColor: .controlBackgroundColor))
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .stroke(isPressed ? Color.accentColor : Color.secondary.opacity(0.16))
-        }
-        .animation(.easeOut(duration: 0.08), value: isPressed)
         .accessibilityValue(isPressed ? "按下" : "松开")
     }
 }
@@ -204,5 +199,5 @@ private struct ButtonStateCard: View {
     ContentView(controllerService: service)
         .environmentObject(AppState(defaults: .standard, autoPresent: false))
         .environmentObject(PermissionsManager())
-        .frame(width: 820, height: 640)
+        .frame(width: 900, height: 640)
 }

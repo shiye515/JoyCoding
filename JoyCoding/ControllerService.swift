@@ -61,6 +61,10 @@ final class ControllerService: ObservableObject {
         state.select(id)
     }
 
+    func selectButton(_ id: ControllerButton.ID) {
+        state.selectButton(id)
+    }
+
     private func register(_ controller: GCController) {
         let objectID = ObjectIdentifier(controller)
         guard controllers[objectID] == nil else { return }

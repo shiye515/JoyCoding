@@ -11,6 +11,7 @@ final class ControllerStateTests: XCTestCase {
 
         XCTAssertEqual(state.devices, [device])
         XCTAssertEqual(state.selectedDeviceID, device.id)
+        XCTAssertEqual(state.selectedButtonID, ControllerButton.a.id)
     }
 
     func testManualSelectionSurvivesUnrelatedDisconnect() {
@@ -25,6 +26,7 @@ final class ControllerStateTests: XCTestCase {
 
         XCTAssertEqual(state.selectedDeviceID, second.id)
         XCTAssertEqual(state.devices, [second])
+        XCTAssertEqual(state.selectedButtonID, ControllerButton.a.id)
     }
 
     func testSelectedDisconnectChoosesFirstRemainingDevice() {
@@ -37,6 +39,7 @@ final class ControllerStateTests: XCTestCase {
         state.remove(first.id)
 
         XCTAssertEqual(state.selectedDeviceID, second.id)
+        XCTAssertEqual(state.selectedButtonID, ControllerButton.a.id)
     }
 
     func testLastDisconnectClearsSelection() {
@@ -48,6 +51,7 @@ final class ControllerStateTests: XCTestCase {
 
         XCTAssertTrue(state.devices.isEmpty)
         XCTAssertNil(state.selectedDeviceID)
+        XCTAssertNil(state.selectedButtonID)
     }
 
     func testUnknownSelectionIsIgnored() {
@@ -103,6 +107,56 @@ final class ControllerStateTests: XCTestCase {
         state.setPressed(true, buttonID: ControllerButton.b.id, deviceID: device.id)
 
         XCTAssertFalse(state.isPressed(ControllerButton.b.id, on: device.id))
+    }
+
+    func testSelectingButtonUpdatesOnlyTheSelectedButton() {
+        let device = makeDevice(name: "Controller", buttons: [.a, .b])
+        var state = ControllerState()
+        state.add(device)
+
+        state.selectButton(ControllerButton.b.id)
+
+        XCTAssertEqual(state.selectedDeviceID, device.id)
+        XCTAssertEqual(state.selectedButtonID, ControllerButton.b.id)
+        XCTAssertEqual(state.selectedButton, .b)
+    }
+
+    func testSwitchingDeviceSelectsItsFirstButton() {
+        let first = makeDevice(name: "First", buttons: [.a, .b])
+        let second = makeDevice(name: "Second", buttons: [.x, .y])
+        var state = ControllerState()
+        state.add(first)
+        state.add(second)
+        state.selectButton(ControllerButton.b.id)
+
+        state.select(second.id)
+
+        XCTAssertEqual(state.selectedDeviceID, second.id)
+        XCTAssertEqual(state.selectedButtonID, ControllerButton.x.id)
+        XCTAssertEqual(state.selectedButton, .x)
+    }
+
+    func testPressedStateDoesNotChangeSelectedButton() {
+        let device = makeDevice(name: "Controller", buttons: [.a, .b])
+        var state = ControllerState()
+        state.add(device)
+        state.selectButton(ControllerButton.b.id)
+
+        state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: device.id)
+        state.setPressed(false, buttonID: ControllerButton.a.id, deviceID: device.id)
+
+        XCTAssertEqual(state.selectedButtonID, ControllerButton.b.id)
+        XCTAssertEqual(state.selectedButton, .b)
+    }
+
+    func testSelectingUnknownButtonIsIgnored() {
+        let device = makeDevice(name: "Controller", buttons: [.a])
+        var state = ControllerState()
+        state.add(device)
+
+        state.selectButton(ControllerButton.b.id)
+
+        XCTAssertEqual(state.selectedButtonID, ControllerButton.a.id)
     }
 
     private func makeDevice(

@@ -50,10 +50,15 @@ struct ControllerDevice: Identifiable, Equatable, Sendable {
 struct ControllerState: Equatable, Sendable {
     private(set) var devices: [ControllerDevice] = []
     private(set) var selectedDeviceID: ControllerDevice.ID?
+    private(set) var selectedButtonID: ControllerButton.ID?
     private(set) var pressedButtonsByDevice: [ControllerDevice.ID: Set<ControllerButton.ID>] = [:]
 
     var selectedDevice: ControllerDevice? {
         devices.first { $0.id == selectedDeviceID }
+    }
+
+    var selectedButton: ControllerButton? {
+        selectedDevice?.buttons.first { $0.id == selectedButtonID }
     }
 
     mutating func add(_ device: ControllerDevice) {
@@ -62,12 +67,19 @@ struct ControllerState: Equatable, Sendable {
         pressedButtonsByDevice[device.id] = []
         if selectedDeviceID == nil {
             selectedDeviceID = device.id
+            selectedButtonID = device.buttons.sorted().first?.id
         }
     }
 
     mutating func select(_ id: ControllerDevice.ID) {
         guard devices.contains(where: { $0.id == id }) else { return }
         selectedDeviceID = id
+        selectedButtonID = selectedDevice?.buttons.sorted().first?.id
+    }
+
+    mutating func selectButton(_ id: ControllerButton.ID) {
+        guard selectedDevice?.buttons.contains(where: { $0.id == id }) == true else { return }
+        selectedButtonID = id
     }
 
     mutating func remove(_ id: ControllerDevice.ID) {
@@ -76,6 +88,7 @@ struct ControllerState: Equatable, Sendable {
         pressedButtonsByDevice.removeValue(forKey: id)
         if wasSelected {
             selectedDeviceID = devices.first?.id
+            selectedButtonID = selectedDevice?.buttons.sorted().first?.id
         }
     }
 
