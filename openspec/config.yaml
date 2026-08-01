@@ -1,0 +1,13 @@
+schema: spec-driven
+
+context: |
+  项目类型：macos swift app
+  目标：xbox joystick 按键映射到键盘按键的工具
+
+rules:
+  proposal:
+    - 使用中文撰写
+  specs:
+    - 使用中文撰写
+  tasks:
+    - 使用中文撰写
