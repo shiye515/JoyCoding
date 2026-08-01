@@ -1,0 +1,10 @@
+.DS_Store
+DerivedData/
+build/
+release/
+*.xcarchive
+*.dSYM
+
+# Per-user Xcode state
+*.xcuserstate
+xcuserdata/

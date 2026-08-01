@@ -33,10 +33,14 @@ struct KeyboardCaptureView: NSViewRepresentable {
     func updateNSView(_ view: CaptureNSView, context: Context) {
         context.coordinator.onBinding = onBinding; context.coordinator.onError = onError
         if isCapturing {
+            view.startCapturing()
             guard view.window?.firstResponder !== view else { return }
             DispatchQueue.main.async { view.window?.makeFirstResponder(view) }
-        } else if view.window?.firstResponder === view {
-            DispatchQueue.main.async { view.window?.makeFirstResponder(nil) }
+        } else {
+            view.stopCapturing()
+            if view.window?.firstResponder === view {
+                DispatchQueue.main.async { view.window?.makeFirstResponder(nil) }
+            }
         }
     }
     func makeCoordinator() -> Coordinator { Coordinator(isCapturing: $isCapturing) }
@@ -50,18 +54,57 @@ struct KeyboardCaptureView: NSViewRepresentable {
 
 final class CaptureNSView: NSView {
     let coordinator: KeyboardCaptureView.Coordinator
+    private var localMonitor: Any?
     init(coordinator: KeyboardCaptureView.Coordinator) { self.coordinator = coordinator; super.init(frame: .zero) }
     required init?(coder: NSCoder) { fatalError() }
+    deinit { if let localMonitor { NSEvent.removeMonitor(localMonitor) } }
     override var acceptsFirstResponder: Bool { true }
-    override func becomeFirstResponder() -> Bool { coordinator.begin(); return true }
-    override func resignFirstResponder() -> Bool { coordinator.isCapturing.wrappedValue = false; return true }
+    override func resignFirstResponder() -> Bool { stopCapturing(); coordinator.isCapturing.wrappedValue = false; return true }
+
+    func startCapturing() {
+        guard localMonitor == nil else { return }
+        coordinator.begin()
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [weak self] event in
+            guard let self, coordinator.isCapturing.wrappedValue else { return event }
+            switch event.type {
+            case .keyDown:
+                captureKeyDown(event)
+            case .flagsChanged:
+                captureFlagsChanged(event)
+            default:
+                return event
+            }
+            return nil
+        }
+    }
+
+    func stopCapturing() {
+        guard let localMonitor else { return }
+        NSEvent.removeMonitor(localMonitor)
+        self.localMonitor = nil
+    }
+
     override func keyDown(with event: NSEvent) {
         guard coordinator.isCapturing.wrappedValue else { return }
-        if let binding = coordinator.state.keyDown(code: UInt16(event.keyCode), flags: event.modifierFlags, isRepeat: event.isARepeat) { coordinator.finish(binding) }
+        captureKeyDown(event)
     }
     override func flagsChanged(with event: NSEvent) {
         guard coordinator.isCapturing.wrappedValue else { return }
-        if let binding = coordinator.state.flagsChanged(code: UInt16(event.keyCode), flags: event.modifierFlags) { coordinator.finish(binding) }
+        captureFlagsChanged(event)
+    }
+
+    private func captureKeyDown(_ event: NSEvent) {
+        if let binding = coordinator.state.keyDown(code: UInt16(event.keyCode), flags: event.modifierFlags, isRepeat: event.isARepeat) {
+            coordinator.finish(binding)
+            stopCapturing()
+        }
+    }
+
+    private func captureFlagsChanged(_ event: NSEvent) {
+        if let binding = coordinator.state.flagsChanged(code: UInt16(event.keyCode), flags: event.modifierFlags) {
+            coordinator.finish(binding)
+            stopCapturing()
+        }
         coordinator.onError(coordinator.state.error)
     }
 }

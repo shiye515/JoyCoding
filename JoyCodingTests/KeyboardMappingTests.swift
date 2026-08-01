@@ -27,6 +27,19 @@ final class KeyboardMappingTests: XCTestCase {
         XCTAssertNil(state.flagsChanged(code: 55, flags: .command))
         XCTAssertEqual(state.keyDown(code: 40, flags: .command, isRepeat: false), KeyboardBinding(keyCode: 40, modifiers: .command))
     }
+
+    func testMultipleModifiersArePreservedWithMainKey() {
+        var state = KeyboardCaptureState()
+        state.start()
+        XCTAssertNil(state.flagsChanged(code: UInt16(kVK_Control), flags: .control))
+        XCTAssertNil(state.flagsChanged(code: UInt16(kVK_Option), flags: [.control, .option]))
+        XCTAssertNil(state.flagsChanged(code: UInt16(kVK_Shift), flags: [.control, .option, .shift]))
+        XCTAssertNil(state.flagsChanged(code: UInt16(kVK_Command), flags: [.control, .option, .shift, .command]))
+        XCTAssertEqual(
+            state.keyDown(code: UInt16(kVK_ANSI_K), flags: [.control, .option, .shift, .command], isRepeat: false),
+            KeyboardBinding(keyCode: UInt16(kVK_ANSI_K), modifiers: [.control, .option, .shift, .command])
+        )
+    }
     func testSingleModifierCompletesOnRelease() {
         var state = KeyboardCaptureState(); state.start()
         XCTAssertNil(state.flagsChanged(code: 56, flags: .shift))
