@@ -4,6 +4,12 @@ JoyCoding 是一个原生 macOS 菜单栏应用：把游戏手柄按键映射为
 
 > 需要 macOS 14 或更新版本，以及一台由系统 GameController 框架识别的手柄。
 
+![JoyCoding 主界面截图](docs/screenshot.png)
+
+## 手柄兼容性
+
+当前版本仅使用 Xbox 兼容手柄完成测试。其他由 macOS GameController 框架识别的手柄理论上也可能可用，但尚未经过完整验证；欢迎通过 Issue 告诉我们你的设备与使用结果。
+
 ## 功能
 
 - 从菜单栏快速打开主窗口。
@@ -44,7 +50,7 @@ xcodebuild -project JoyCoding.xcodeproj -scheme JoyCoding test
 
 ## 贡献与安全
 
-欢迎提交 Issue 和 Pull Request；请先阅读 [贡献指南](CONTRIBUTING.md)。安全问题请遵循 [安全策略](SECURITY.md) 私下报告，不要在公开 Issue 中披露。
+JoyCoding 很欢迎社区贡献代码、修复问题、补充手柄兼容性测试或改进文档。欢迎提交 Issue 和 Pull Request；请先阅读 [贡献指南](CONTRIBUTING.md)。安全问题请遵循 [安全策略](SECURITY.md) 私下报告，不要在公开 Issue 中披露。
 
 ## 许可证
 
