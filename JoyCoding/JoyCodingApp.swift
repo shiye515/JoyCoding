@@ -5,8 +5,15 @@ import SwiftUI
 struct JoyCodingApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var appState = AppState()
-    @StateObject private var controllerService = ControllerService()
+    @StateObject private var mappingStore: UserDefaultsKeyboardMappingStore
+    @StateObject private var controllerService: ControllerService
     @StateObject private var permissionsManager = PermissionsManager()
+
+    init() {
+        let store = UserDefaultsKeyboardMappingStore()
+        _mappingStore = StateObject(wrappedValue: store)
+        _controllerService = StateObject(wrappedValue: ControllerService(state: ControllerState(), mappingStore: store))
+    }
 
     var body: some Scene {
         Window("JoyCoding", id: AppWindowID.main) {

@@ -6,11 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXFileReference section */
-		9E224DDF301DC69300C14C7B /* JoyCoding.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoyCoding.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		9E224DF0301DC70000C14C7B /* JoyCodingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoyCodingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-/* End PBXFileReference section */
-
 /* Begin PBXContainerItemProxy section */
 		9E224DF9301DC70000C14C7B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -20,6 +15,11 @@
 			remoteInfo = JoyCoding;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		9E224DDF301DC69300C14C7B /* JoyCoding.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoyCoding.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9E224DF0301DC70000C14C7B /* JoyCodingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JoyCodingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9E224DE1301DC69300C14C7B /* JoyCoding */ = {

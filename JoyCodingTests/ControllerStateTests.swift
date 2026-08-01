@@ -71,17 +71,17 @@ final class ControllerStateTests: XCTestCase {
         state.add(first)
         state.add(second)
 
-        state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: first.id)
-        state.setPressed(true, buttonID: ControllerButton.b.id, deviceID: first.id)
-        state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: second.id)
-        state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: second.id)
+        _ = state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: first.id)
+        _ = state.setPressed(true, buttonID: ControllerButton.b.id, deviceID: first.id)
+        _ = state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: second.id)
+        _ = state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: second.id)
 
         XCTAssertTrue(state.isPressed(ControllerButton.a.id, on: first.id))
         XCTAssertTrue(state.isPressed(ControllerButton.b.id, on: first.id))
         XCTAssertTrue(state.isPressed(ControllerButton.a.id, on: second.id))
         XCTAssertFalse(state.isPressed(ControllerButton.b.id, on: second.id))
 
-        state.setPressed(false, buttonID: ControllerButton.a.id, deviceID: first.id)
+        _ = state.setPressed(false, buttonID: ControllerButton.a.id, deviceID: first.id)
 
         XCTAssertFalse(state.isPressed(ControllerButton.a.id, on: first.id))
         XCTAssertTrue(state.isPressed(ControllerButton.b.id, on: first.id))
@@ -92,7 +92,7 @@ final class ControllerStateTests: XCTestCase {
         let device = makeDevice(name: "Controller")
         var state = ControllerState()
         state.add(device)
-        state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: device.id)
+        _ = state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: device.id)
 
         state.remove(device.id)
 
@@ -104,7 +104,7 @@ final class ControllerStateTests: XCTestCase {
         var state = ControllerState()
         state.add(device)
 
-        state.setPressed(true, buttonID: ControllerButton.b.id, deviceID: device.id)
+        _ = state.setPressed(true, buttonID: ControllerButton.b.id, deviceID: device.id)
 
         XCTAssertFalse(state.isPressed(ControllerButton.b.id, on: device.id))
     }
@@ -142,8 +142,8 @@ final class ControllerStateTests: XCTestCase {
         state.add(device)
         state.selectButton(ControllerButton.b.id)
 
-        state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: device.id)
-        state.setPressed(false, buttonID: ControllerButton.a.id, deviceID: device.id)
+        _ = state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: device.id)
+        _ = state.setPressed(false, buttonID: ControllerButton.a.id, deviceID: device.id)
 
         XCTAssertEqual(state.selectedButtonID, ControllerButton.b.id)
         XCTAssertEqual(state.selectedButton, .b)

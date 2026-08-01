@@ -45,6 +45,15 @@ struct ControllerDevice: Identifiable, Equatable, Sendable {
     let name: String
     let category: String
     let buttons: [ControllerButton]
+    let profileID: String
+
+    init(id: UUID, name: String, category: String, buttons: [ControllerButton]) {
+        self.id = id
+        self.name = name
+        self.category = category
+        self.buttons = buttons
+        self.profileID = ControllerProfileID.make(name: name, category: category, buttonIDs: buttons.map(\.id))
+    }
 }
 
 struct ControllerState: Equatable, Sendable {
@@ -96,9 +105,9 @@ struct ControllerState: Equatable, Sendable {
         _ pressed: Bool,
         buttonID: ControllerButton.ID,
         deviceID: ControllerDevice.ID
-    ) {
+    ) -> Bool {
         guard let device = devices.first(where: { $0.id == deviceID }),
-              device.buttons.contains(where: { $0.id == buttonID }) else { return }
+              device.buttons.contains(where: { $0.id == buttonID }) else { return false }
 
         var pressedButtons = pressedButtonsByDevice[deviceID, default: []]
         let changed: Bool
@@ -110,6 +119,7 @@ struct ControllerState: Equatable, Sendable {
         if changed {
             pressedButtonsByDevice[deviceID] = pressedButtons
         }
+        return changed
     }
 
     func isPressed(_ buttonID: ControllerButton.ID, on deviceID: ControllerDevice.ID) -> Bool {
@@ -134,8 +144,8 @@ extension ControllerState {
             category: "DualSense",
             buttons: [.a, .b, .x, .y]
         ))
-        state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: firstID)
-        state.setPressed(true, buttonID: ControllerButton.leftShoulder.id, deviceID: firstID)
+        _ = state.setPressed(true, buttonID: ControllerButton.a.id, deviceID: firstID)
+        _ = state.setPressed(true, buttonID: ControllerButton.leftShoulder.id, deviceID: firstID)
         return state
     }
 }

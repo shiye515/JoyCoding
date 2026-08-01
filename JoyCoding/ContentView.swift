@@ -77,6 +77,7 @@ struct ContentView: View {
                         ForEach(device.buttons.sorted()) { button in
                             ButtonListRow(
                                 button: button,
+                                mapping: controllerService.mappingStore.mapping(profileID: device.profileID, buttonID: button.id),
                                 isPressed: controllerService.state.isPressed(
                                     button.id,
                                     on: device.id
@@ -104,11 +105,21 @@ struct ContentView: View {
            let device = controllerService.state.selectedDevice {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("按键映射")
-                            .font(.title2.weight(.bold))
-                        Text(device.name)
-                            .foregroundStyle(.secondary)
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("按键映射")
+                                .font(.title2.weight(.bold))
+                            Text(device.name)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button {
+                            permissionsManager.refresh()
+                            appState.presentPermissions()
+                        } label: {
+                            Label("权限设置", systemImage: "hand.raised")
+                        }
+                        .help("打开权限配置引导")
                     }
 
                     GroupBox("当前按键") {
@@ -128,17 +139,12 @@ struct ContentView: View {
                         .padding(.vertical, 4)
                     }
 
-                    GroupBox("键盘映射") {
-                        LabeledContent("映射到") {
-                            Text(button.name)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.vertical, 4)
-                    }
-
-                    Text("这是映射设置的界面占位。后续版本会在这里选择键盘按键；当前不会保存配置或发送键盘事件。")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
+                    MappingEditorView(
+                        device: device,
+                        button: button,
+                        store: controllerService.mappingStore,
+                        clear: controllerService.clearMapping(profileID:buttonID:)
+                    )
                 }
                 .padding(28)
                 .frame(maxWidth: 640, alignment: .leading)
@@ -177,6 +183,7 @@ struct ContentView: View {
 
 private struct ButtonListRow: View {
     let button: ControllerButton
+    let mapping: KeyboardButtonMapping?
     let isPressed: Bool
 
     var body: some View {
@@ -186,16 +193,30 @@ private struct ButtonListRow: View {
                 .animation(.easeOut(duration: 0.08), value: isPressed)
             Text(button.name)
             Spacer()
-            Text(isPressed ? "按下" : "松开")
-                .font(.caption.weight(isPressed ? .semibold : .regular))
-                .foregroundStyle(isPressed ? Color.accentColor : Color.secondary)
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(mapping.map { KeyboardKeyCatalog.displayName(for: $0.binding) } ?? "未映射")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(isPressed ? "按下" : "松开")
+                    .font(.caption.weight(isPressed ? .semibold : .regular))
+                    .foregroundStyle(isPressed ? Color.accentColor : Color.secondary)
+            }
         }
         .accessibilityValue(isPressed ? "按下" : "松开")
     }
 }
 
 #Preview("Connected controllers") {
-    let service = ControllerService(state: .preview, autoStart: false)
+    let service = ControllerService(state: .preview, mappingStore: UserDefaultsKeyboardMappingStore(), autoStart: false)
+    ContentView(controllerService: service)
+        .environmentObject(AppState(defaults: .standard, autoPresent: false))
+        .environmentObject(PermissionsManager())
+        .frame(width: 900, height: 640)
+}
+
+#Preview("No controller") {
+    let store = UserDefaultsKeyboardMappingStore(defaults: UserDefaults(suiteName: "Preview.NoController")!)
+    let service = ControllerService(state: ControllerState(), mappingStore: store, autoStart: false)
     ContentView(controllerService: service)
         .environmentObject(AppState(defaults: .standard, autoPresent: false))
         .environmentObject(PermissionsManager())

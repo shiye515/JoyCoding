@@ -1,5 +1,6 @@
 import Combine
 import GameController
+import AppKit
 
 @MainActor
 final class ControllerService: ObservableObject {
@@ -9,13 +10,22 @@ final class ControllerService: ObservableObject {
     private var deviceIDs: [ObjectIdentifier: ControllerDevice.ID] = [:]
     private var observers: [NSObjectProtocol] = []
     private var hasStarted = false
+    let mappingStore: UserDefaultsKeyboardMappingStore
+    private let mappingEngine: MappingEngine
 
     convenience init(autoStart: Bool = true) {
-        self.init(state: ControllerState(), autoStart: autoStart)
+        self.init(state: ControllerState(), mappingStore: UserDefaultsKeyboardMappingStore(), autoStart: autoStart)
     }
 
-    init(state: ControllerState, autoStart: Bool = true) {
+    init(
+        state: ControllerState,
+        mappingStore: UserDefaultsKeyboardMappingStore,
+        mappingEngine: MappingEngine? = nil,
+        autoStart: Bool = true
+    ) {
         self.state = state
+        self.mappingStore = mappingStore
+        self.mappingEngine = mappingEngine ?? MappingEngine(store: mappingStore)
         if autoStart {
             start()
         }
@@ -25,11 +35,14 @@ final class ControllerService: ObservableObject {
         observers.forEach(NotificationCenter.default.removeObserver)
         controllers.values.forEach(Self.clearHandlers)
         GCController.stopWirelessControllerDiscovery()
+        let engine = mappingEngine
+        Task { @MainActor in engine.releaseAll() }
     }
 
     func start() {
         guard !hasStarted else { return }
         hasStarted = true
+        GCController.shouldMonitorBackgroundEvents = true
 
         let center = NotificationCenter.default
         observers.append(center.addObserver(
@@ -41,6 +54,9 @@ final class ControllerService: ObservableObject {
             MainActor.assumeIsolated {
                 self?.register(controller)
             }
+        })
+        observers.append(center.addObserver(forName: NSApplication.willTerminateNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.stop() }
         })
         observers.append(center.addObserver(
             forName: .GCControllerDidDisconnect,
@@ -55,6 +71,24 @@ final class ControllerService: ObservableObject {
 
         GCController.controllers().forEach(register)
         GCController.startWirelessControllerDiscovery()
+    }
+
+    func stop() {
+        guard hasStarted else { return }
+        hasStarted = false
+        observers.forEach(NotificationCenter.default.removeObserver)
+        observers.removeAll()
+        controllers.values.forEach(Self.clearHandlers)
+        controllers.removeAll()
+        deviceIDs.removeAll()
+        mappingEngine.releaseAll()
+        GCController.stopWirelessControllerDiscovery()
+        GCController.shouldMonitorBackgroundEvents = false
+    }
+
+    func clearMapping(profileID: String, buttonID: String) {
+        mappingStore.remove(profileID: profileID, buttonID: buttonID)
+        mappingEngine.releaseAll(profileID: profileID, buttonID: buttonID)
     }
 
     func selectDevice(_ id: ControllerDevice.ID) {
@@ -90,6 +124,11 @@ final class ControllerService: ObservableObject {
         guard let deviceID = deviceIDs.removeValue(forKey: objectID) else { return }
         controllers.removeValue(forKey: objectID)
         Self.clearHandlers(controller)
+        disconnectDevice(deviceID)
+    }
+
+    func disconnectDevice(_ deviceID: ControllerDevice.ID) {
+        mappingEngine.releaseAll(deviceSessionID: deviceID)
         state.remove(deviceID)
     }
 
@@ -154,12 +193,16 @@ final class ControllerService: ObservableObject {
         }
     }
 
-    private func setPressed(
+    func setPressed(
         _ pressed: Bool,
         button: ControllerButton,
         deviceID: ControllerDevice.ID
     ) {
-        state.setPressed(pressed, buttonID: button.id, deviceID: deviceID)
+        guard state.setPressed(pressed, buttonID: button.id, deviceID: deviceID),
+              let device = state.devices.first(where: { $0.id == deviceID }) else { return }
+        let source = MappingSource(deviceSessionID: deviceID, buttonID: button.id)
+        if pressed { mappingEngine.pressed(source: source, profileID: device.profileID) }
+        else { mappingEngine.released(source: source) }
     }
 
     private nonisolated static func clearHandlers(_ controller: GCController) {
