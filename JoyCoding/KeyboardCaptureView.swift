@@ -17,7 +17,7 @@ struct KeyboardCaptureState: Equatable {
         pressedModifierCodes.remove(code)
         guard pressedModifierCodes.isEmpty else { return nil }
         if seenModifierCodes.count == 1, let only = seenModifierCodes.first { return KeyboardBinding(keyCode: only) }
-        if seenModifierCodes.count > 1 { error = "组合键需要一个非修饰主键" }
+        if seenModifierCodes.count > 1 { error = String(localized: "组合键需要一个非修饰主键") }
         return nil
     }
     private func modifierFlag(for code: UInt16) -> NSEvent.ModifierFlags {

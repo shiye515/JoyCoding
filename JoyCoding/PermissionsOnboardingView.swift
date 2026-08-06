@@ -165,10 +165,10 @@ struct PermissionsOnboardingView: View {
 
     private var headerTitle: String {
         switch step {
-        case .welcome: "首次设置"
-        case .inputMonitoring: "输入监控"
-        case .accessibility: "辅助功能"
-        case .done: "准备就绪"
+        case .welcome: String(localized: "首次设置")
+        case .inputMonitoring: String(localized: "输入监控")
+        case .accessibility: String(localized: "辅助功能")
+        case .done: String(localized: "准备就绪")
         }
     }
 
@@ -196,9 +196,9 @@ private struct PermissionStatusBadge: View {
 
     private var title: String {
         switch state {
-        case .granted: "已授权"
-        case .denied: "已拒绝"
-        case .notDetermined: "待设置"
+        case .granted: String(localized: "已授权")
+        case .denied: String(localized: "已拒绝")
+        case .notDetermined: String(localized: "待设置")
         }
     }
 

@@ -17,7 +17,14 @@ enum MappingHoldBehavior: String, Codable, CaseIterable, Sendable {
     case hold
     case repeatPress
 
-    var displayName: String { self == .hold ? "持续按住" : "重复按下" }
+    var displayName: String {
+        switch self {
+        case .hold:
+            String(localized: "持续按住")
+        case .repeatPress:
+            String(localized: "重复按下")
+        }
+    }
 }
 
 struct KeyboardButtonMapping: Equatable, Sendable, Codable {
